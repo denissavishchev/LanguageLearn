@@ -22,11 +22,11 @@ struct ListView: View {
                     
                     ScrollView(.vertical, showsIndicators: false){
                         VStack(spacing: 8){
-                            CardItem()
-                            CardItem()
-                            CardItem()
-                            CardItem()
+                            CardItem(
+                                onDelete: {}
+                            )
                         }
+                        .padding(.horizontal, 16)
                     }
                 }
             Button{
@@ -49,34 +49,80 @@ struct ListView: View {
 
 
 struct CardItem: View{
+    
+    @State var offsetX: CGFloat = 0
+    var onDelete: ()->()
+    
     var body: some View{
-        VStack(alignment: .leading){
+        ZStack(alignment: .trailing){
+            removeImage()
+            
             VStack(alignment: .leading){
-                Text("TR")
-                    .font(.system(size: 12, weight: .black))
-                    .padding(.bottom, 4)
-                Text("Araba")
-                    .font(.system(size: 18, weight: .black))
-                    .padding(.bottom, 1)
-                Text("Car")
-                    .font(.system(size: 18, weight: .light))
+                VStack(alignment: .leading){
+                    Text("TR")
+                        .font(.system(size: 12, weight: .black))
+                        .padding(.bottom, 4)
+                    Text("Araba")
+                        .font(.system(size: 18, weight: .black))
+                        .padding(.bottom, 1)
+                    Text("Car")
+                        .font(.system(size: 18, weight: .light))
+                }
+                Divider()
+                VStack(alignment: .leading){
+                    Text("Note")
+                        .font(.system(size: 12, weight: .black))
+                        .padding(.bottom, 2)
+                    Text("a four-wheeled road vehicle that is powered by an engine and is able to carry a small number of people")
+                }
             }
-            Divider()
-            VStack(alignment: .leading){
-                Text("Note")
-                    .font(.system(size: 12, weight: .black))
-                    .padding(.bottom, 2)
-                Text("a four-wheeled road vehicle that is powered by an engine and is able to carry a small number of people")
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(Color(.orange))
+            .cornerRadius(12)
+            .offset(x: offsetX)
+            .gesture(DragGesture()
+                .onChanged{value in
+                    if value.translation.width < 0{
+                        offsetX = value.translation.width
+                    }
+                }
+                .onEnded{value in
+                    withAnimation{
+                        if screenSize().width * 0.7 < -value.translation.width{
+                            offsetX = -screenSize().width
+                            onDelete()
+                        }else{
+                            offsetX = .zero
+                        }
+                    }
+                }
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(Color(.orange))
-        .cornerRadius(12)
-        
     }
+    
+    @ViewBuilder
+    func removeImage()-> some View{
+        Image(systemName: "xmark")
+            .resizable()
+            .frame(width: 12, height: 12)
+            .offset(x: 30)
+            .offset(x: offsetX * 0.5)
+            .scaleEffect(CGSize(width: 0.1 * -offsetX * 0.08, height: 0.1 * -offsetX * 0.08))
+    }
+    
 }
 
 #Preview {
     ContentView()
+}
+
+extension View{
+    func screenSize() ->CGSize{
+        guard let window = UIApplication.shared.connectedScenes.first as?
+                UIWindowScene else {
+            return .zero
+        }
+        return window.screen.bounds.size
+    }
 }

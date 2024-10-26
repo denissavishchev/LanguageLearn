@@ -1,17 +1,22 @@
 import SwiftUI
 
 struct ContentView: View {
-    //Test
+    
     @State var selectedTab = 1
     @ObservedObject var listViewModel = ListViewModel()
     @ObservedObject var linkViewModel = LinkViewModel()
+    
+    init() {
+        UITabBar.appearance().shadowImage = UIImage()
+        UITabBar.appearance().backgroundImage = UIImage()
+        UITabBar.appearance().backgroundColor = UIColor.black
+    }
     
     var body: some View {
         ZStack{
             TabView(selection: $selectedTab){
                 ListView()
                     .environmentObject(listViewModel)
-                    .padding(.horizontal, 16)
                     .tag(1)
                     .tabItem {
                         VStack{
@@ -38,7 +43,8 @@ struct ContentView: View {
                             Text("Links")
                         }
                     }
-            }
+            }.accentColor(Color(.green))
+            
             if listViewModel.isShowAddView {
                 AddNewWordView()
                     .environmentObject(listViewModel)
